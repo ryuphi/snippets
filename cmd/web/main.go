@@ -22,16 +22,7 @@ func main() {
 
 	flag.StringVar(&config.Addr, "addr", ":4000", "http network address")
 	flag.StringVar(&config.StaticDir, "static-dir", "./ui/static", "path to static assets")
-
 	flag.Parse()
-
-	f, err := os.OpenFile("/tmp/info.log", os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer f.Close()
 
 	// Use log.New() to create a logger for writing information messages. This takes
 	// three parameters: the destination to write the logs to (os.Stdout), a string
