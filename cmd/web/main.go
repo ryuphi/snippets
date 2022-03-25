@@ -50,15 +50,6 @@ func main() {
 		infoLog:  infoLog,
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
-
-	fileServer := http.FileServer(http.Dir(config.StaticDir))
-
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
 	// that the server uses the same network address and routes as before and set
 	// the ErrorLog field so that the server now uses the custom errorLog logger in
@@ -66,7 +57,7 @@ func main() {
 	server := &http.Server{
 		Addr:     config.Addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler:  app.routes(), // call the app.routes method.
 	}
 
 	infoLog.Printf("starting new server on %s", config.Addr)
