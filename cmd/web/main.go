@@ -1,7 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
+	_ "github.com/go-sql-driver/mysql"
+	"learn-web/snippets/pkg/models/mysql"
 	"log"
 	"net/http"
 	"os"
@@ -10,11 +13,13 @@ import (
 type Config struct {
 	Addr      string
 	StaticDir string
+	Dsn       string
 }
 
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func main() {
@@ -22,6 +27,9 @@ func main() {
 
 	flag.StringVar(&config.Addr, "addr", ":4000", "http network address")
 	flag.StringVar(&config.StaticDir, "static-dir", "./ui/static", "path to static assets")
+
+	flag.StringVar(&config.Dsn, "dns", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
+
 	flag.Parse()
 
 	// Use log.New() to create a logger for writing information messages. This takes
@@ -35,10 +43,18 @@ func main() {
 	// file name and line number.
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.LUTC|log.Lshortfile)
 
+	db, err := openDB(config.Dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	defer db.Close()
+
 	// initialize a new instance of application containing the dependencies
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		snippets: &mysql.SnippetModel{Db: db},
 	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
@@ -57,4 +73,18 @@ func main() {
 	err = server.ListenAndServe()
 
 	errorLog.Fatal(err)
+}
+
+// openDB function wrap sql.Open and return a sql.DB connection pool
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
