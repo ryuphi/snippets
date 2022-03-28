@@ -13,7 +13,7 @@
             </tr>
             {{range .Snippets}}
             <tr>
-                <td><a href='/snippet?id={{.Id}}'>{{.Title}}</a></td>
+                <td><a href='/snippets/{{.Id}}'>{{.Title}}</a></td>
                 <!-- Use the new template function here -->
                 <td>{{humanDate .Created}}</td>
                 <td>#{{.Id}}</td>
