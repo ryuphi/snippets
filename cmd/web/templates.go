@@ -4,12 +4,23 @@ import (
 	"html/template"
 	"learn-web/snippets/pkg/models"
 	"path/filepath"
+	"time"
 )
 
 type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+}
+
+var functions = template.FuncMap{
+	"humanDate": humanDate,
+}
+
+// Create a humanDate function which returns a nicely formatted string
+// representation of a time.Time objects
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
 }
 
 func createTemplateCache(dir string) (map[string]*template.Template, error) {
@@ -31,7 +42,10 @@ func createTemplateCache(dir string) (map[string]*template.Template, error) {
 		name := filepath.Base(page)
 
 		// parse the page template file in to a template set.
-		ts, err := template.ParseFiles(page)
+		// also the template.FuncMap must be registered with the template set before you
+		// call the ParseFiles method. This means we hace to use template.New to create an empty
+		// template set, use the Funcs method to register the template.FuncMap, and then parse the file as normal
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}
