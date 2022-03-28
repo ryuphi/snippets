@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"learn-web/snippets/pkg/forms"
 	"learn-web/snippets/pkg/models"
 	"net/http"
 	"strconv"
@@ -45,7 +46,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createSnippetForm(writer http.ResponseWriter, request *http.Request) {
-	app.render(writer, request, "create.page.tmpl", nil)
+	app.render(writer, request, "create.page.tmpl", &templateData{Form: forms.New(nil)})
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
@@ -57,12 +58,20 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusBadRequest)
 	}
 
-	// retrieve the data using r.PostForm.Get method.
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	expires := r.PostForm.Get("expires")
+	// create a new forms.Form struct, then use the validation methods to check the content.
+	form := forms.New(r.PostForm)
+	form.Required("title", "content", "expires")
+	form.MaxLength("title", 100)
+	form.PermittedValues("expires", "365", "7", "1")
 
-	id, err := app.snippets.Insert(title, content, expires)
+	if !form.Valid() {
+		app.render(w, r, "create.page.tmpl", &templateData{Form: form})
+		return
+	}
+
+	// because the form data (with type url.Values) has been anonymously embedded in the forms.Form struct.
+	// we can use the Get method to retrieve the validated value for a particular form field.
+	id, err := app.snippets.Insert(form.Get("title"), form.Get("content"), form.Get("expires"))
 	if err != nil {
 		app.serverError(w, err)
 		return

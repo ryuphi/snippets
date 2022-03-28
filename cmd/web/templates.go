@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"learn-web/snippets/pkg/forms"
 	"learn-web/snippets/pkg/models"
 	"path/filepath"
 	"time"
@@ -9,6 +10,7 @@ import (
 
 type templateData struct {
 	CurrentYear int
+	Form        *forms.Form
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 }
