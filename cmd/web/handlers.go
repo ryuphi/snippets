@@ -44,16 +44,23 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "show.page.tmpl", &templateData{Snippet: snippet})
 }
 
+func (app *application) createSnippetForm(writer http.ResponseWriter, request *http.Request) {
+	app.render(writer, request, "create.page.tmpl", nil)
+}
+
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed) // use clientError helper
-		return
+	// r.ParseForm which adds any data in POST request bodies to the r.PostForm map.
+	// This also works in the same way for PUT and PATCH requests.
+	// If there are any errors, we send a 400 bad request to the user.
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
 	}
 
-	title := "New snippet"
-	content := "This is a new snippet for test..."
-	expires := "7"
+	// retrieve the data using r.PostForm.Get method.
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires := r.PostForm.Get("expires")
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {

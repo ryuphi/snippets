@@ -14,8 +14,10 @@ func (app *application) routes() http.Handler {
 	mux := pat.New()
 
 	mux.Get("/", http.HandlerFunc(app.home))
-	mux.Get("/snippets/:id", http.HandlerFunc(app.showSnippet))
-	mux.Get("/snippets/create", http.HandlerFunc(app.createSnippet))
+	mux.Get("/snippets", http.HandlerFunc(app.home))
+	mux.Post("/snippets", http.HandlerFunc(app.createSnippet))
+	mux.Get("/snippets/create", http.HandlerFunc(app.createSnippetForm))
+	mux.Get("/snippets/:id", http.HandlerFunc(app.showSnippet)) // it must go here after /snippets/create
 
 	// file server...
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
