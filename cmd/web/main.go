@@ -95,6 +95,11 @@ func main() {
 		ErrorLog:  errorLog,
 		Handler:   app.routes(), // call the app.routes method.
 		TLSConfig: tlsConfig,
+
+		// Add Idle, Rad and Write timeouts to the server.
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("starting new server on %s", config.Addr)
