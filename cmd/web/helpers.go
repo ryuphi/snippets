@@ -36,6 +36,9 @@ func (app *application) addDefaultData(td *templateData, request *http.Request) 
 		td = &templateData{}
 	}
 	td.CurrentYear = time.Now().Year()
+
+	// Add the flash message to the template data, if one exists...
+	td.Flash = app.sessions.PopString(request, "flash")
 	return td
 }
 
