@@ -4,22 +4,26 @@ import (
 	"database/sql"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 	"html/template"
 	"learn-web/snippets/pkg/models/mysql"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type Config struct {
 	Addr      string
 	StaticDir string
 	Dsn       string
+	Secret    string
 }
 
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	sessions      *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -31,6 +35,8 @@ func main() {
 	flag.StringVar(&config.StaticDir, "static-dir", "./ui/static", "path to static assets")
 
 	flag.StringVar(&config.Dsn, "dns", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
+
+	flag.StringVar(&config.Secret, "secret", "secretkey", "Secret key")
 
 	flag.Parse()
 
@@ -59,10 +65,15 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Use the sessions.New() function to init a new session manager
+	session := sessions.New([]byte(*&config.Secret))
+	session.Lifetime = 12 * time.Hour
+
 	// initialize a new instance of application containing the dependencies
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
+		sessions:      session,
 		snippets:      &mysql.SnippetModel{Db: db},
 		templateCache: templateCache,
 	}
