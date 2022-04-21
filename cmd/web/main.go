@@ -91,7 +91,8 @@ func main() {
 	infoLog.Printf("starting new server on %s", config.Addr)
 
 	// Call the listenAndServer method on our new http.Server struct.
-	err = server.ListenAndServe()
+	// Use the listenAndServerTLS method to start the https server. We pass the certificate files
+	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	errorLog.Fatal(err)
 }
