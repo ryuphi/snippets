@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
@@ -78,14 +79,22 @@ func main() {
 		templateCache: templateCache,
 	}
 
+	// init  a tls.Config struct to gold the non-default tls settings we want
+	// the server to use.
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
 	// that the server uses the same network address and routes as before and set
 	// the ErrorLog field so that the server now uses the custom errorLog logger in
 	// the event of any problems.
 	server := &http.Server{
-		Addr:     config.Addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(), // call the app.routes method.
+		Addr:      config.Addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(), // call the app.routes method.
+		TLSConfig: tlsConfig,
 	}
 
 	infoLog.Printf("starting new server on %s", config.Addr)
