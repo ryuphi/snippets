@@ -15,6 +15,9 @@
             <a href='/snippets/create'>Create snippet</a>
         </nav>
         <main>
+            {{with .Flash}}
+                <div class='flash'>{{.}}</div>
+            {{end}}
             {{template "main" .}}   
         </main>
         <!-- invoke the footer template -->
