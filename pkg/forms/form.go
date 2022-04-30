@@ -3,6 +3,7 @@ package forms
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
@@ -17,6 +18,23 @@ func New(data url.Values) *Form {
 	return &Form{
 		data,
 		errors(map[string][]string{}),
+	}
+}
+
+// EmailPattern Use the regexp.MustCompile function to parse a pattern and compile a
+// regular expression for sanity checking the format of an email address.
+var EmailPattern = regexp.MustCompile("^[a-zA-Z\\d.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z\\d](?:[a-zA-Z\\d-]{0,61}[a-zA-Z\\d])?(?:\\.[a-zA-Z\\d](?:[a-zA-Z\\d-]{0,61}[a-zA-Z\\d])?)*$")
+
+// MatchesPattern method to check that a specific field in the form
+// matches a regular expression.
+func (f *Form) MatchesPattern(field string, patter *regexp.Regexp) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+
+	if !patter.MatchString(value) {
+		f.Errors.Add(field, "This field is invalid")
 	}
 }
 
@@ -40,6 +58,17 @@ func (f *Form) MaxLength(field string, d int) {
 	}
 	if utf8.RuneCountInString(value) > d {
 		f.Errors.Add(field, fmt.Sprintf("This field is too long (maximum is %d characters)", d))
+	}
+}
+
+// MinLength method to check that a specific field in the form contains a minimum number of characters.
+func (f *Form) MinLength(field string, d int) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if utf8.RuneCountInString(value) < d {
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characteres)", d))
 	}
 }
 
