@@ -14,3 +14,12 @@ type Snippet struct {
 	Created time.Time
 	Expires time.Time
 }
+
+type User struct {
+	Id             int
+	Name           string
+	Email          string
+	HashedPassword []byte
+	Created        time.Time
+	Active         bool
+}
