@@ -11,8 +11,17 @@
     <body>
         <header><h1><a href='/'>snippetbox</a></h1></header>
         <nav>
-            <a href='/'>home</a>
-            <a href='/snippets/create'>Create snippet</a>
+            <div>
+                <a href='/'>home</a>
+                <a href='/snippets/create'>Create snippet</a>
+            </div>
+            <div>
+                <a href="/user/signup">Signup</a>
+                <a href="/user/login">Login</a>
+                <form action="/user/logout" method="post">
+                    <button>Logout</button>
+                </form>
+            </div>
         </nav>
         <main>
             {{with .Flash}}
